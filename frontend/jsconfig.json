@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./*"],
+      "@/*": ["./*"],
+      "~~/*": ["./*"],
+      "@@/*": ["./*"]
+    },
+    "types":[
+      "@nuxtjs/toast"
+    ]
+  },
+  "exclude": ["node_modules", ".nuxt", "dist"]
+}

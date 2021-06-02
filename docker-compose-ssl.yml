@@ -1,0 +1,101 @@
+version: "3.8"
+
+services:
+  ml:
+    build: ./app
+    command: gunicorn server:app --bind 0.0.0.0:8082 --timeout 120 --log-level warning
+    container_name: galeno_app_ml
+    volumes:
+      - models_volume:/app/models
+      - ./app:/app
+    expose:
+      - 8082
+    ports:
+      - 8082:8082
+    env_file:
+      - ./app/.env
+    depends_on:
+      - db
+
+  backend:
+    build: ./backend
+    command: gunicorn api.wsgi:application --bind 0.0.0.0:8081 --timeout 90 --log-level warning
+    container_name: galeno_app_backend
+    restart: on-failure
+    volumes:
+      - ./backend:/backend
+      - static_volume:/backend/static
+      - media_volume:/backend/media
+    expose:
+      - 8081
+    ports:
+      - 8081:8081
+    env_file:
+      - ./backend/.env.prod
+    depends_on:
+      - db
+  
+  db:
+    image: postgres:12.0-alpine
+    container_name: galeno_app_db
+    restart: on-failure
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    expose:
+      - 5432
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=galeno_app_dba
+      - POSTGRES_PASSWORD=I0%QycAI@iRV
+      - POSTGRES_DB=galeno_app
+    env_file:
+      - ./db/.env.prod
+  
+  frontend:
+    build: ./frontend
+    container_name: galeno_app_frontend
+    entrypoint: "/bin/sh -c 'trap : TERM INT; (while true; do sleep 1000; done) & wait'"
+    volumes:
+      - ./frontend:/frontend
+      - dist_volume:/frontend/dist
+      - node_modules_volume:/frontend/node_modules
+    depends_on:
+      - backend
+  
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    restart: unless-stopped
+    volumes:
+      - ./nginx/ssl/data/certbot/conf:/etc/letsencrypt
+      - ./nginx/ssl/data/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 5d & wait $${!}; done;'"
+
+  server:
+    build: ./nginx/ssl
+    container_name: galeno_app_server
+    restart: on-failure
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx/ssl/conf.d:/etc/nginx/conf.d
+      - ./backend/logs:/app/logs
+      - static_volume:/backend/static:ro
+      - media_volume:/backend/media:ro
+      - dist_volume:/app/html:ro
+      - ./nginx/ssl/data/certbot/conf:/etc/letsencrypt
+      - ./nginx/ssl/data/certbot/www:/var/www/certbot 
+    depends_on:
+      - backend
+      - ml
+      - frontend
+
+volumes:
+  static_volume:
+  media_volume:
+  postgres_data:
+  dist_volume:
+  node_modules_volume:
+  models_volume:
