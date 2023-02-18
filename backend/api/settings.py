@@ -24,7 +24,7 @@ SETTINGS_PATH = os.path.dirname(os.path.dirname(__file__))
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("SECRET_KEY", default='7a)$nu$5kp$&!tnh3@yn!pdl+&1@lkczn3^7!-xjj(z2b*-ntf')
+SECRET_KEY = os.environ.get("SECRET_KEY", default='')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = int(os.environ.get("DEBUG", default=0))
@@ -99,7 +99,7 @@ DATABASES = {
         'ENGINE': os.environ.get("SQL_ENGINE", default="django.db.backends.postgresql"),
         'NAME': os.environ.get("SQL_DATABASE", default="galeno_app"),
         'USER': os.environ.get("SQL_USER", default="galeno_app_dba"),
-        'PASSWORD': os.environ.get("SQL_PASSWORD", default="I0%QycAI@iRV"),
+        'PASSWORD': os.environ.get("SQL_PASSWORD", default=""),
         'HOST': os.environ.get("SQL_HOST", default="db"),
         'PORT': int(os.environ.get("SQL_PORT", default=5432)),
     }
@@ -276,7 +276,6 @@ SWAGGER_SETTINGS = {
 #EMAIL_HOST_USER = 'apikey'
 #SENDGRID_API_KEY = os.environ["SENDGRID_API_KEY"]
 #SENDGRID_SANDBOX_MODE_IN_DEBUG=False
-#EMAIL_HOST_PASSWORD = os.environ.get("SENDGRID_API_KEY", default="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")
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
